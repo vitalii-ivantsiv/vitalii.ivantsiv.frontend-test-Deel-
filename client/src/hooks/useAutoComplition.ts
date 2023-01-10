@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import useDebounce from "./useDebounce";
 import {KEYBOARD_KEYS} from "../constants/KeyCodes";
 
@@ -12,7 +12,8 @@ export default function useAutoComplition({ delay, filter }: IAutoCompleteProps)
     const [inputValue, setInputValue] = useState('');
     const [proposals, setProposals] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [activeItemIndex, setActiveItemIndex] = useState(-1)
+    const [activeItemIndex, setActiveItemIndex] = useState(-1);
+    const proposalListRef = useRef<HTMLUListElement>(null)
 
 
     const updateProposals = async (value: string) => {
@@ -46,9 +47,15 @@ export default function useAutoComplition({ delay, filter }: IAutoCompleteProps)
         }
     }
 
+    const proposalElementHeight = proposalListRef.current?.children[0]?.clientHeight;
+
     const scrollUp = () => {
         if (activeItemIndex > 0) {
             setActiveItemIndex(activeItemIndex - 1)
+        }
+
+        if(proposalElementHeight !== undefined && proposalListRef.current) {
+            proposalListRef.current.scrollTop -= proposalElementHeight;
         }
     }
 
@@ -56,6 +63,10 @@ export default function useAutoComplition({ delay, filter }: IAutoCompleteProps)
     const scrollDown = () => {
         if (activeItemIndex < proposals.length - 1) {
             setActiveItemIndex(activeItemIndex + 1);
+        }
+
+        if(proposalElementHeight !== undefined && proposalListRef.current) {
+            proposalListRef.current.scrollTop = activeItemIndex * proposalElementHeight;
         }
     }
 
@@ -87,7 +98,7 @@ export default function useAutoComplition({ delay, filter }: IAutoCompleteProps)
             className: `display-flex ${index === activeItemIndex ? 'active' : ''}`
         }),
         proposals,
-        selectedIndex: activeItemIndex,
         isLoading,
+        proposalListRef,
     }
 }

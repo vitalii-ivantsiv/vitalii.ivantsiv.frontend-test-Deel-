@@ -2,22 +2,15 @@ import useAutoComplition from "../../hooks/useAutoComplition";
 
 import './index.css';
 
-const Options = [
-    {value: "1", label: "John"},
-    {value: "2", label: "Jack"},
-    {value: "3", label: "Jane"},
-    {value: "4", label: "Mike"},
-]
-
 export default function AutoComplete() {
-    const {proposals, getInputProps, getProposalProps, isLoading} = useAutoComplition({
+    const {proposals, getInputProps, getProposalProps, isLoading, proposalListRef} = useAutoComplition({
         delay: 500,
-        filter: searchValue => {
-            return new Promise(resolve => {
-                const options = Options.filter(option => new RegExp(`^${searchValue}`, "i").test(option.label));
+        filter: async searchValue => {
+            const res = await fetch(`/api/v1/autocomplete/countries?country=${searchValue}`)
 
-                resolve(options.map(o => o.label));
-            })
+            const data = await res.json()
+
+            return data.map((d: { name: string; }) =>  d.name);
         },
     })
 
@@ -35,7 +28,7 @@ export default function AutoComplete() {
                     )
                 }
             </div>
-            <ul>
+            <ul ref={proposalListRef}>
                 {
                     proposals.map((proposal, index) => {
                         const matched = proposal.match(new RegExp(`^${inputProps.value}`, "i"));
