@@ -19,7 +19,7 @@ export default function AutoComplete() {
     return (
         <div className="AutoComplete">
             <div className="display-flex">
-                <input placeholder="Search" {...inputProps} />
+                <input placeholder="Type country name" {...inputProps} />
                 {
                     isLoading && (
                         <div className="icon-container">
